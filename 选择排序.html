@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>选择排序</title>
+</head>
+
+<body>
+  <canvas id="canvas" width="1000" height="1000" style="background-color: #000;"></canvas>
+  <button id="btn">开始排序</button>
+</body>
+<script>
+  const canvas = document.getElementById('canvas')
+  const ctx = canvas.getContext('2d')
+  ctx.fillStyle = 'white'
+  ctx.translate(500, 500)
+
+  let nums = []
+  for (let i = 0; i < 4; ++i) {
+    // 生成一个 0 - 180 的有序数组
+    const arr = [...Array(180).keys()]
+    const res = []
+    while (arr.length) {
+      // 打乱
+      const randomIndex = Math.random() * arr.length - 1
+      res.push(arr.splice(randomIndex, 1)[0])
+    }
+    nums = [...nums, ...res]
+  }
+
+  // 单个长方形构造函数
+  function Rect(x, y, width, height) {
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
+  }
+
+  // 单个长方形的渲染函数
+  Rect.prototype.draw = function () {
+    ctx.beginPath()
+    ctx.fillRect(this.x, this.y, this.width, this.height)
+    ctx.closePath()
+  }
+
+  const CosandSin = []
+  for (let i = 0; i < 360; ++i) {
+    const jiaodu = i / 180 * Math.PI
+    CosandSin.push({ cos: Math.cos(jiaodu), sin: Math.sin(jiaodu) })
+  }
+
+  function drawAll(arr) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        ctx.clearRect(-500, -500, 1000, 1000)
+        const rects = []
+        for (let i = 0; i < arr.length; ++i) {
+          const num = arr[i]
+          const { cos, sin } = CosandSin[Math.floor(i / 2)] // 一个角画两个
+          const x = num * cos
+          const y = num * sin
+          rects.push(new Rect(x, y, 5, 3))  // 收集所有长方形
+        }
+        rects.forEach(rect => rect.draw())  // 遍历渲染
+        resolve('draw success')
+      }, 10)
+    })
+  }
+  drawAll(nums)
+
+  async function selectionSort(arr) {
+    const len = arr.length
+    let minIndex, temp
+    for (let i = 0; i < len - 1; ++i) {
+      minIndex = i
+      for (let j = i + 1; j < len; j++) {
+        if (arr[j] < arr[minIndex]) {
+          minIndex = j
+        }
+      }
+      temp = arr[i]
+      arr[i] = arr[minIndex]
+      arr[minIndex] = temp
+      await drawAll(arr)
+    }
+    return arr
+  }
+
+  document.getElementById('btn').onclick = function () {
+    selectionSort(nums)
+  }
+</script>
+
+</html>
